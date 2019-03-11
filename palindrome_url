@@ -1,0 +1,35 @@
+#!/usr/bin/node
+
+let fs = require("fs");
+let Phrase = require("mulder-brewing-palindrome");
+let request = require('request');
+let url = 'https://cdn.learnenough.com/phrases.txt';
+let text = '';
+
+
+request(url, function(error, response, body) {
+  let lines = body.split("\n");
+  let palindromes = lines.filter(line => new Phrase(line).palindrome());
+  console.log(palindromes);
+  const writeStream = fs.createWriteStream('palindromeResults.txt');
+  const pathName = writeStream.path;
+
+  body.split("\n").forEach(function(line) {
+    let phrase = new Phrase(line);
+    if (phrase.palindrome()) {
+      writeStream.write(`${line}\n`)
+    }
+  })
+  // the finish event is emitted when all data has been flushed from the stream
+  writeStream.on('finish', () => {
+     console.log(`wrote all the array data to file ${pathName}`);
+  });
+
+  // handle the errors on the write process
+  writeStream.on('error', (err) => {
+      console.error(`There is an error writing the file ${pathName} => ${err}`)
+  });
+
+  // close the stream
+  writeStream.end();
+})
