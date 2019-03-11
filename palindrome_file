@@ -5,9 +5,27 @@ let Phrase = require("mulder-brewing-palindrome");
 
 let text = fs.readFileSync("phrases.txt","utf-8");
 
+const writeStream = fs.createWriteStream('palindromeResults.txt');
+
+const pathName = writeStream.path;
+
 text.split("\n").forEach(function(line) {
   let phrase = new Phrase(line);
   if (phrase.palindrome()) {
-    console.log("palindrome detected:", line);
+    // console.log("palindrome detected:", line);
+    // resultArray.push(line);
+    writeStream.write(`${line}\n`)
   }
 })
+// the finish event is emitted when all data has been flushed from the stream
+writeStream.on('finish', () => {
+   console.log(`wrote all the array data to file ${pathName}`);
+});
+
+// handle the errors on the write process
+writeStream.on('error', (err) => {
+    console.error(`There is an error writing the file ${pathName} => ${err}`)
+});
+
+// close the stream
+writeStream.end();
